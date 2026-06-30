@@ -1,9 +1,16 @@
 import socket
 import os
 import threading
+import logging
 
 HOST = "127.0.0.1"
 PORT = 5000
+
+logging.basicConfig(
+    filename="server.log",
+    level=logging.INFO,
+    format="%(asctime)s - %(message)s"
+)
 
 
 def authenticate(username, password):
@@ -20,10 +27,12 @@ def authenticate(username, password):
 def handle_client(client_socket, addr):
 
     print(f"Connected: {addr}")
+    logging.info(f"Client connected: {addr}")
 
     while True:
 
         try:
+
             command = client_socket.recv(1024).decode()
 
             if not command:
@@ -42,10 +51,21 @@ def handle_client(client_socket, addr):
                 password = parts[2]
 
                 if authenticate(username, password):
+
+                    logging.info(
+                        f"User '{username}' logged in successfully"
+                    )
+
                     client_socket.send(
                         "LOGIN SUCCESS".encode()
                     )
+
                 else:
+
+                    logging.warning(
+                        f"Failed login attempt for user '{username}'"
+                    )
+
                     client_socket.send(
                         "LOGIN FAILED".encode()
                     )
@@ -80,6 +100,10 @@ def handle_client(client_socket, addr):
 
                         received += len(data)
 
+                logging.info(
+                    f"File uploaded: {filename}"
+                )
+
                 client_socket.send(
                     "UPLOAD SUCCESS".encode()
                 )
@@ -99,6 +123,10 @@ def handle_client(client_socket, addr):
                 else:
 
                     filesize = os.path.getsize(filepath)
+
+                    logging.info(
+                        f"File downloaded: {filename}"
+                    )
 
                     client_socket.send(
                         f"SIZE {filesize}".encode()
@@ -125,6 +153,10 @@ def handle_client(client_socket, addr):
 
                     os.remove(filepath)
 
+                    logging.info(
+                        f"File deleted: {filename}"
+                    )
+
                     client_socket.send(
                         "DELETE SUCCESS".encode()
                     )
@@ -137,7 +169,10 @@ def handle_client(client_socket, addr):
 
             elif parts[0] == "QUIT":
 
-                client_socket.send("Goodbye".encode())
+                client_socket.send(
+                    "Goodbye".encode()
+                )
+
                 break
 
             else:
@@ -148,12 +183,21 @@ def handle_client(client_socket, addr):
 
         except Exception as e:
 
+            logging.error(
+                f"Error with client {addr}: {e}"
+            )
+
             print(f"Error with {addr}: {e}")
+
             break
 
     client_socket.close()
 
     print(f"Disconnected: {addr}")
+
+    logging.info(
+        f"Client disconnected: {addr}"
+    )
 
 
 server = socket.socket(
@@ -168,10 +212,13 @@ server.setsockopt(
 )
 
 server.bind((HOST, PORT))
+
 server.listen()
 
 print("Server Started...")
 print("Waiting for connections...")
+
+logging.info("Server started")
 
 while True:
 

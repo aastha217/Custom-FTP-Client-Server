@@ -1,0 +1,4 @@
+2026-07-01 03:49:16,837 - Server started
+2026-07-01 03:49:28,768 - Client connected: ('127.0.0.1', 49398)
+2026-07-01 03:49:32,643 - User 'admin' logged in successfully
+2026-07-01 03:49:48,809 - Client disconnected: ('127.0.0.1', 49398)
