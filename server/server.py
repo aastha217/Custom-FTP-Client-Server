@@ -3,23 +3,45 @@ import socket
 HOST = "127.0.0.1"
 PORT = 5000
 
-server = socket.socket(socket.AF_INET,
-                       socket.SOCK_STREAM)
+
+def authenticate(username, password):
+    with open("../users.txt", "r") as f:
+        for line in f:
+            u, p = line.strip().split(":")
+
+            if username == u and password == p:
+                return True
+
+    return False
+
+
+server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 server.bind((HOST, PORT))
-
 server.listen()
 
 print("Server Started...")
+print("Waiting for connection...")
 
 client_socket, addr = server.accept()
 
 print("Connected:", addr)
 
-msg = client_socket.recv(1024).decode()
+command = client_socket.recv(1024).decode()
 
-print("Client:", msg)
+print("Received:", command)
 
-client_socket.send("Hello Client".encode())
+parts = command.split()
+
+if parts[0] == "LOGIN":
+
+    username = parts[1]
+    password = parts[2]
+
+    if authenticate(username, password):
+        client_socket.send("LOGIN SUCCESS".encode())
+    else:
+        client_socket.send("LOGIN FAILED".encode())
 
 client_socket.close()
+server.close()
