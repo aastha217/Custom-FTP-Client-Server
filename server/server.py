@@ -59,6 +59,27 @@ while True:
 
             client_socket.send(response.encode())
 
+        elif parts[0] == "UPLOAD":
+
+            filename = parts[1]
+            filesize = int(parts[2])
+
+            filepath = f"../storage/{filename}"
+
+            with open(filepath, "wb") as f:
+
+                received = 0
+
+                while received < filesize:
+
+                    data = client_socket.recv(1024)
+
+                    f.write(data)
+
+                    received += len(data)
+
+            client_socket.send("UPLOAD SUCCESS".encode())
+
         elif parts[0] == "QUIT":
 
             client_socket.send("Goodbye".encode())
