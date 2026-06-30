@@ -1,4 +1,5 @@
 import socket
+import os
 
 HOST = "127.0.0.1"
 PORT = 5000
@@ -21,27 +22,26 @@ server.bind((HOST, PORT))
 server.listen()
 
 print("Server Started...")
-print("Waiting for connection...")
+print("Waiting for connections...")
 
-client_socket, addr = server.accept()
+while True:
 
-print("Connected:", addr)
+    client_socket, addr = server.accept()
 
-command = client_socket.recv(1024).decode()
+    print(f"Connected: {addr}")
 
-print("Received:", command)
+    command = client_socket.recv(1024).decode()
 
-parts = command.split()
+    parts = command.split()
 
-if parts[0] == "LOGIN":
+    if parts[0] == "LOGIN":
 
-    username = parts[1]
-    password = parts[2]
+        username = parts[1]
+        password = parts[2]
 
-    if authenticate(username, password):
-        client_socket.send("LOGIN SUCCESS".encode())
-    else:
-        client_socket.send("LOGIN FAILED".encode())
+        if authenticate(username, password):
+            client_socket.send("LOGIN SUCCESS".encode())
+        else:
+            client_socket.send("LOGIN FAILED".encode())
 
-client_socket.close()
-server.close()
+    client_socket.close()
