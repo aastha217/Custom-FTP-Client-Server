@@ -1,7 +1,7 @@
 import socket
 
 HOST = "127.0.0.1"
-PORT = 5000   # use whatever port your server uses
+PORT = 5000 
 
 client = socket.socket(socket.AF_INET,
                        socket.SOCK_STREAM)
@@ -25,11 +25,35 @@ if response == "LOGIN SUCCESS":
 
         command = input("FTP> ")
 
-        client.send(command.encode())
+        parts = command.split()
 
-        response = client.recv(4096).decode()
+        if parts[0].upper() == "UPLOAD":
 
-        print(response)
+            filename = parts[1]
+
+            with open(filename, "rb") as f:
+
+                data = f.read()
+
+            filesize = len(data)
+
+            client.send(
+                f"UPLOAD {filename} {filesize}".encode()
+            )
+
+            client.sendall(data)
+
+            response = client.recv(1024).decode()
+
+            print(response)
+
+        else:
+
+            client.send(command.encode())
+
+            response = client.recv(4096).decode()
+
+            print(response)
 
         if command.upper() == "QUIT":
             break

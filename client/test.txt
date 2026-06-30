@@ -1,0 +1,2 @@
+Hello from FTP Client!
+This is my first upload.
