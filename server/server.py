@@ -32,6 +32,8 @@ while True:
 
     command = client_socket.recv(1024).decode()
 
+    print("Received:", command)
+
     parts = command.split()
 
     if parts[0] == "LOGIN":
@@ -43,5 +45,13 @@ while True:
             client_socket.send("LOGIN SUCCESS".encode())
         else:
             client_socket.send("LOGIN FAILED".encode())
+
+    elif parts[0] == "LIST":
+
+        files = os.listdir("../storage")
+
+        response = "\n".join(files)
+
+        client_socket.send(response.encode())
 
     client_socket.close()
