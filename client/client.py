@@ -1,7 +1,8 @@
 import socket
+import os
 
 HOST = "127.0.0.1"
-PORT = 5000 
+PORT = 5000
 
 client = socket.socket(socket.AF_INET,
                        socket.SOCK_STREAM)
@@ -27,25 +28,68 @@ if response == "LOGIN SUCCESS":
 
         parts = command.split()
 
+        if len(parts) == 0:
+            continue
+
         if parts[0].upper() == "UPLOAD":
 
             filename = parts[1]
 
-            with open(filename, "rb") as f:
+            try:
 
-                data = f.read()
+                with open(filename, "rb") as f:
 
-            filesize = len(data)
+                    data = f.read()
 
-            client.send(
-                f"UPLOAD {filename} {filesize}".encode()
-            )
+                filesize = len(data)
 
-            client.sendall(data)
+                client.send(
+                    f"UPLOAD {filename} {filesize}".encode()
+                )
+
+                client.sendall(data)
+
+                response = client.recv(1024).decode()
+
+                print(response)
+
+            except FileNotFoundError:
+
+                print("File not found")
+
+        elif parts[0].upper() == "DOWNLOAD":
+
+            filename = parts[1]
+
+            client.send(command.encode())
 
             response = client.recv(1024).decode()
 
-            print(response)
+            if response == "FILE_NOT_FOUND":
+
+                print("File not found on server")
+
+            else:
+
+                filesize = int(
+                    response.split()[1]
+                )
+
+                filepath = f"../downloads/{filename}"
+
+                with open(filepath, "wb") as f:
+
+                    received = 0
+
+                    while received < filesize:
+
+                        data = client.recv(1024)
+
+                        f.write(data)
+
+                        received += len(data)
+
+                print("DOWNLOAD SUCCESS")
 
         else:
 
