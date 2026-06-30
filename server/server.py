@@ -30,28 +30,38 @@ while True:
 
     print(f"Connected: {addr}")
 
-    command = client_socket.recv(1024).decode()
+    while True:
 
-    print("Received:", command)
+        command = client_socket.recv(1024).decode()
 
-    parts = command.split()
+        if not command:
+            break
 
-    if parts[0] == "LOGIN":
+        print("Received:", command)
 
-        username = parts[1]
-        password = parts[2]
+        parts = command.split()
 
-        if authenticate(username, password):
-            client_socket.send("LOGIN SUCCESS".encode())
-        else:
-            client_socket.send("LOGIN FAILED".encode())
+        if parts[0] == "LOGIN":
 
-    elif parts[0] == "LIST":
+            username = parts[1]
+            password = parts[2]
 
-        files = os.listdir("../storage")
+            if authenticate(username, password):
+                client_socket.send("LOGIN SUCCESS".encode())
+            else:
+                client_socket.send("LOGIN FAILED".encode())
 
-        response = "\n".join(files)
+        elif parts[0] == "LIST":
 
-        client_socket.send(response.encode())
+            files = os.listdir("../storage")
+
+            response = "\n".join(files)
+
+            client_socket.send(response.encode())
+
+        elif parts[0] == "QUIT":
+
+            client_socket.send("Goodbye".encode())
+            break
 
     client_socket.close()
