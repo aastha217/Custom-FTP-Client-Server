@@ -3,18 +3,14 @@ import socket
 HOST = "127.0.0.1"
 PORT = 5000
 
-client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+client = socket.socket(socket.AF_INET,
+                       socket.SOCK_STREAM)
 
 client.connect((HOST, PORT))
 
-username = input("Username: ")
-password = input("Password: ")
+client.send("LIST".encode())
 
-command = f"LOGIN {username} {password}"
-
-client.send(command.encode())
-
-response = client.recv(1024).decode()
+response = client.recv(4096).decode()
 
 print(response)
 
